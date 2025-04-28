@@ -1,58 +1,57 @@
-import React, { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
-import ChatInterface from './components/ChatInterface';
-import { useChatContext } from './context/ChatContext';
-import { Menu } from 'lucide-react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LandingNav from './components/LandingNav';
+import Home from './pages/landing/Home';
+import About from './pages/landing/About';
+import Pricing from './pages/landing/Pricing';
+import Contact from './pages/landing/Contact';
+import Policy from './pages/landing/Policy';
+import ChatApp from './ChatApp';
 
-function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
-  const { currentConversation } = useChatContext();
-
-  useEffect(() => {
-    const handleResize = () => {
-      setSidebarOpen(window.innerWidth >= 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
+const App: React.FC = () => {
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-black dark:text-white">
-      {/* Sidebar */}
-      <div className="flex-shrink-0">
-        {/* Mobile menu button */}
-        <button 
-          className="md:hidden fixed z-20 top-4 left-4 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          <Menu size={24} />
-        </button>
+    <Router>
+      <Routes>
+        {/* Landing Pages */}
+        <Route path="/" element={
+          <>
+            <LandingNav />
+            <Home />
+          </>
+        } />
+        <Route path="/about" element={
+          <>
+            <LandingNav />
+            <About />
+          </>
+        } />
+        <Route path="/pricing" element={
+          <>
+            <LandingNav />
+            <Pricing />
+          </>
+        } />
+        <Route path="/contact" element={
+          <>
+            <LandingNav />
+            <Contact />
+          </>
+        } />
+        <Route path="/policy" element={
+          <>
+            <LandingNav />
+            <Policy />
+          </>
+        } />
 
-        {/* Sidebar overlay */}
-        <div 
-          className={`fixed inset-0 bg-black bg-opacity-50 z-10 transition-opacity duration-300 md:hidden ${
-            sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-          onClick={() => setSidebarOpen(false)}
-        />
-        
-        {/* Sidebar content */}
-        <div 
-          className={`fixed md:static w-[280px] z-20 h-full bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 transform ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:translate-x-0`}
-        >
-          <Sidebar onClose={() => setSidebarOpen(false)} />
-        </div>
-      </div>
+        {/* Main Chat Application */}
+        <Route path="/bhima/*" element={<ChatApp />} />
 
-      {/* Chat Interface */}
-      <div className="flex-1 overflow-hidden">
-        <ChatInterface />
-      </div>
-    </div>
+        {/* Redirect to home for unknown routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useChatContext } from '../context/ChatContext';
 import { PlusCircle, MessageSquare, Trash2, Edit2, X, Settings } from 'lucide-react';
-import ModelSelector from './ModelSelector';
+import SettingsModal from './SettingsModal';
 
 interface SidebarProps {
   onClose: () => void;
@@ -19,7 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
-  const [showSettings, setShowSettings] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const handleEdit = (id: string, currentTitle: string) => {
     setEditingId(id);
@@ -60,13 +60,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
         </div>
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 rounded-md text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+            onClick={() => setShowSettingsModal(true)}
+            className="p-2 rounded-md text-black dark:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:text-white transition-colors"
           >
             <Settings size={20} />
           </button>
           <button
-            className="md:hidden p-2 rounded-md text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+            className="md:hidden p-2 rounded-md text-black dark:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:text-white transition-colors"
             onClick={onClose}
           >
             <X size={20} />
@@ -76,18 +76,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
 
       <button
         onClick={() => createNewConversation()}
-        className="mx-4 mt-4 mb-2 py-2 px-4 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-md flex items-center space-x-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all"
+        className="mx-4 mt-4 mb-2 py-2 px-4 text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-md flex items-center space-x-2 transition-all"
       >
         <PlusCircle size={18} />
         <span>New chat</span>
       </button>
-
-      {showSettings && (
-        <div className="mx-4 mb-4 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-md p-4 shadow-sm">
-          <h3 className="text-sm font-medium mb-2">Model Selection</h3>
-          <ModelSelector />
-        </div>
-      )}
 
       <div className="flex-1 overflow-y-auto pt-2">
         <h2 className="px-4 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -99,13 +92,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             <li className="px-2 py-3 text-sm text-gray-500 dark:text-gray-400">No conversations yet</li>
           ) : (
             sortedConversations.map((conv) => (
-              <li key={conv.id} className={`
-                relative rounded-md 
-                ${currentConversationId === conv.id 
-                  ? 'bg-gray-100 dark:bg-gray-900' 
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-900'}
-                transition-colors
-              `}>
+              <li
+                key={conv.id}
+                className={`relative group ${
+                  currentConversationId === conv.id
+                    ? 'bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-600/20 dark:to-purple-600/20'
+                    : 'hover:bg-gradient-to-r hover:from-blue-600/5 hover:to-purple-600/5 dark:hover:from-blue-600/10 dark:hover:to-purple-600/10'
+                } transition-all`}
+              >
                 {editingId === conv.id ? (
                   <div className="p-2 flex">
                     <input
@@ -134,7 +128,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
                           e.stopPropagation();
                           handleEdit(conv.id, conv.title);
                         }}
-                        className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                        className="p-1 text-gray-500 dark:text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 rounded transition-all"
                       >
                         <Edit2 size={14} />
                       </button>
@@ -143,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
                           e.stopPropagation();
                           deleteConversation(conv.id);
                         }}
-                        className="p-1 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                        className="p-1 text-gray-500 dark:text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600 hover:to-red-700 rounded transition-all"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -157,8 +151,16 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
       </div>
 
       <div className="p-4 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800">
-        B.H.I.M.A v0.1.0
+        <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          B.H.I.M.A v0.1.0
+        </span>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal 
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+      />
     </div>
   );
 };

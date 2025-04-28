@@ -153,7 +153,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="relative">
-      <div className="flex items-end border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus-within:ring-1 focus-within:ring-black dark:focus-within:ring-white focus-within:border-black dark:focus-within:border-white transition-colors">
+      <div className="flex items-end border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus-within:ring-1 focus-within:ring-blue-600 dark:focus-within:ring-purple-600 focus-within:border-blue-600 dark:focus-within:border-purple-600 transition-colors">
         <textarea
           ref={textareaRef}
           value={currentPrompt}
@@ -164,17 +164,30 @@ const ChatInput: React.FC<ChatInputProps> = ({
           className="flex-1 max-h-[200px] py-3 pl-4 pr-12 resize-none border-0 bg-transparent focus:ring-0 focus:outline-none text-sm text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           rows={1}
         />
-        <button
-          onClick={handleSubmit}
-          disabled={isLoading || !currentPrompt.trim()}
-          className={`absolute right-3 bottom-3 p-1 rounded-md 
-            ${isLoading || !currentPrompt.trim() 
-              ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed' 
-              : 'text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
-            } transition-colors`}
-        >
-          <Send size={18} />
-        </button>
+        {isLoading ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-bounce"></div>
+              <span className="text-sm bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent ml-2">Thinking</span>
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-bounce [animation-delay:0.15s]"></div>
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-bounce [animation-delay:0.3s]"></div>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={handleSubmit}
+            disabled={isLoading || !currentPrompt.trim()}
+            className={`p-2 rounded-md ${
+              isLoading || !currentPrompt.trim()
+                ? 'text-gray-400 dark:text-gray-600'
+                : 'text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+            } transition-all`}
+          >
+            <Send size={20} />
+          </button>
+        )}
       </div>
     </div>
   );
