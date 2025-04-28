@@ -1,11 +1,9 @@
 import OpenAI from 'openai';
 import { Message } from '../types';
 
-const OPENROUTER_API_KEY = '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';
-
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: OPENROUTER_API_KEY,
+  apiKey: import.meta.env.VITE_OPENROUTER_API_KEY,
   defaultHeaders: {
     "HTTP-Referer": window.location.href,
     "X-Title": "AI Chat Interface",
@@ -13,7 +11,11 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 });
 
-export async function sendMessageToAI(messages: Message[], model: string = 'microsoft/mai-ds-r1:free') {
+export async function sendMessageToAI(
+  messages: Message[], 
+  model: string = 'microsoft/mai-ds-r1:free',
+  onChunk?: (chunk: string) => void
+) {
   try {
     const formattedMessages = messages.map(msg => ({
       role: msg.role,
@@ -23,9 +25,17 @@ export async function sendMessageToAI(messages: Message[], model: string = 'micr
     const response = await openai.chat.completions.create({
       model: model,
       messages: formattedMessages,
+      stream: true
     });
 
-    return response.choices[0].message.content;
+    let fullResponse = '';
+    for await (const chunk of response) {
+      const content = chunk.choices[0]?.delta?.content || '';
+      fullResponse += content;
+      onChunk?.(fullResponse);
+    }
+
+    return fullResponse;
   } catch (error) {
     console.error('Error sending message to AI:', error);
     throw error;

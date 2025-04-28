@@ -23,13 +23,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+  const [streamingContent, setStreamingContent] = useState<string>('');
 
-  // Load conversations from localStorage on initial render
   useEffect(() => {
     const loadedConversations = getConversationsFromLocalStorage();
     setConversations(loadedConversations);
     
-    // Set current conversation to the most recent one, or create a new one if none exist
     if (loadedConversations.length > 0) {
       const mostRecent = loadedConversations.reduce((prev, current) => 
         current.updatedAt > prev.updatedAt ? current : prev
@@ -43,7 +43,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Get current conversation object
   const currentConversation = currentConversationId 
     ? conversations.find(conv => conv.id === currentConversationId) || null
     : null;
@@ -65,7 +64,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendMessage = async (content: string) => {
     if (!currentConversation) return;
 
-    // Add user message
     const userMessage: Message = {
       id: nanoid(),
       role: 'user',
@@ -73,59 +71,79 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       timestamp: Date.now()
     };
 
-    const updatedMessages = [...currentConversation.messages, userMessage];
+    const assistantMessage: Message = {
+      id: nanoid(),
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now(),
+      model: currentConversation.model // Store the current model with the message
+    };
+
+    setStreamingMessageId(assistantMessage.id);
+    setStreamingContent('');
+
+    const updatedMessages = [...currentConversation.messages, userMessage, assistantMessage];
     const updatedConversation = {
       ...currentConversation,
       messages: updatedMessages,
       updatedAt: Date.now(),
-      title: updatedMessages.length === 1 ? content.slice(0, 30) + (content.length > 30 ? '...' : '') : currentConversation.title
+      title: updatedMessages.length === 2 ? content.slice(0, 30) + (content.length > 30 ? '...' : '') : currentConversation.title
     };
 
-    // Update state with user message
     updateConversation(updatedConversation);
 
-    // Send to AI and get response
     setIsLoading(true);
     try {
-      const aiResponse = await sendMessageToAI(updatedMessages, currentConversation.model);
-      
-      // Add AI response
-      const assistantMessage: Message = {
-        id: nanoid(),
-        role: 'assistant',
-        content: aiResponse || "Sorry, I couldn't generate a response.",
-        timestamp: Date.now()
-      };
+      const aiResponse = await sendMessageToAI(
+        [...currentConversation.messages, userMessage],
+        currentConversation.model,
+        (chunk) => {
+          setStreamingContent(chunk);
+          
+          const streamingConversation = {
+            ...updatedConversation,
+            messages: updatedMessages.map(msg => 
+              msg.id === assistantMessage.id 
+                ? { ...msg, content: chunk }
+                : msg
+            )
+          };
+          updateConversation(streamingConversation);
+        }
+      );
 
-      const finalMessages = [...updatedMessages, assistantMessage];
+      const finalMessages = updatedMessages.map(msg => 
+        msg.id === assistantMessage.id 
+          ? { ...msg, content: aiResponse }
+          : msg
+      );
+
       const finalConversation = {
         ...updatedConversation,
         messages: finalMessages,
         updatedAt: Date.now()
       };
 
-      // Update state with AI response
       updateConversation(finalConversation);
     } catch (error) {
       console.error('Error getting AI response:', error);
       
-      // Add error message
-      const errorMessage: Message = {
-        id: nanoid(),
-        role: 'assistant',
-        content: "Sorry, there was an error processing your request. Please try again.",
-        timestamp: Date.now()
-      };
-
+      const errorMessage = "Sorry, there was an error processing your request. Please try again.";
       const errorConversation = {
         ...updatedConversation,
-        messages: [...updatedMessages, errorMessage],
+        messages: updatedMessages.map(msg => 
+          msg.id === assistantMessage.id 
+            ? { ...msg, content: errorMessage }
+            : msg
+        ),
         updatedAt: Date.now()
       };
 
       updateConversation(errorConversation);
     } finally {
       setIsLoading(false);
+      setStreamingMessageId(null);
+      setStreamingContent('');
     }
   };
 
@@ -133,7 +151,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     deleteConversationUtil(id);
     setConversations(prev => prev.filter(conv => conv.id !== id));
     
-    // If we deleted the current conversation, select another one or create new
     if (currentConversationId === id) {
       const remainingConversations = conversations.filter(conv => conv.id !== id);
       if (remainingConversations.length > 0) {
@@ -172,6 +189,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     currentConversationId,
     currentConversation,
     isLoading,
+    streamingMessageId,
+    streamingContent,
     createNewConversation,
     setCurrentConversationId,
     sendMessage,
