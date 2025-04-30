@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
   const activeConversation = conversations.find(c => c.id === activeConversationId);
   
   return (
-    <header className="h-16 border-b dark:border-gray-700 flex items-center justify-between px-4 md:pl-6 md:pr-8">
+    <header className="sticky top-0 h-16 border-b dark:border-gray-700 flex items-center justify-between px-4 md:pl-6 md:pr-8">
       {/* Mobile menu toggle */}
       <button 
         onClick={onToggleSidebar}
