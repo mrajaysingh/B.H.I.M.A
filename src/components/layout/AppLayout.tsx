@@ -33,7 +33,7 @@ const AppLayout: React.FC = () => {
   const handleCloseSidebar = () => setIsSidebarOpen(false);
 
   return (
-    <>
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -41,6 +41,7 @@ const AppLayout: React.FC = () => {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
+            className="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900"
           >
             <Preloader />
           </motion.div>
@@ -50,21 +51,37 @@ const AppLayout: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className={`h-screen flex flex-col md:flex-row overflow-hidden ${
-              settings.theme === 'dark' ? 'dark bg-gray-900' : 'bg-gray-50'
-            }`}
+            className="flex-1 flex flex-col h-full"
           >
-            <Sidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} />
+            <Header 
+              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+              isSidebarOpen={isSidebarOpen} 
+            />
             
-            <div className="flex-1 flex flex-col h-full overflow-hidden">
-              <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />
-              <ChatArea />
-              <FloatingInput />
+            <div className="flex-1 flex overflow-hidden">
+              <AnimatePresence>
+                {isSidebarOpen && (
+                  <motion.div
+                    initial={{ x: -300 }}
+                    animate={{ x: 0 }}
+                    exit={{ x: -300 }}
+                    transition={{ type: 'spring', damping: 20 }}
+                    className="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-lg"
+                  >
+                    <Sidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              <div className="flex-1 flex flex-col">
+                <ChatArea />
+                <FloatingInput />
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 

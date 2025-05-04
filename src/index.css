@@ -11,4 +11,13 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  .custom-cursor {
+    caret-color: #4F46E5;
+  }
+
+  .custom-cursor::selection {
+    background-color: #4F46E5;
+    color: white;
+  }
 }

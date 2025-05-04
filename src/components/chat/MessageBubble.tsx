@@ -46,21 +46,21 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
     return parts.length > 0 ? parts : <p className="whitespace-pre-wrap break-words">{content}</p>;
   };
-
+  
   return (
     <div className={`flex items-start gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
       <div className={`p-2 rounded-full ${
         message.role === 'user' 
           ? 'bg-indigo-600 text-white' 
           : 'bg-gray-200 dark:bg-gray-700'
-      }`}>
+        }`}>
         {message.role === 'user' ? (
           <User2 className="h-5 w-5" />
-        ) : (
+          ) : (
           <Bot className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-        )}
-      </div>
-      
+          )}
+        </div>
+        
       <div className={`flex-1 space-y-2 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
         <div className={`inline-block max-w-[90%] sm:max-w-[85%] rounded-2xl px-3 py-2 ${
           message.role === 'user'

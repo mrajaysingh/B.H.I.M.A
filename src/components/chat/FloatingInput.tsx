@@ -37,6 +37,27 @@ const FloatingInput: React.FC = () => {
     updateLastMessage 
   } = useConversationStore();
 
+  // Focus textarea on mount and after sending message
+  useEffect(() => {
+    if (textareaRef.current && !isStreaming) {
+      textareaRef.current.focus();
+    }
+  }, [isStreaming]);
+
+  // Focus textarea when clicking anywhere in the document
+  useEffect(() => {
+    const handleDocumentClick = () => {
+      if (textareaRef.current && !isStreaming) {
+        textareaRef.current.focus();
+      }
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+    };
+  }, [isStreaming]);
+
   // Handle click outside for attach options
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,11 +66,14 @@ const FloatingInput: React.FC = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    if (showAttachOptions) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [showAttachOptions]);
   
   const activeConversation = conversations.find(c => c.id === activeConversationId);
   
@@ -65,12 +89,22 @@ const FloatingInput: React.FC = () => {
     setIsThinking(!isThinking);
   };
   
+  const handleThinkingClick = () => {
+    if (isStreaming) return;
+    setIsThinking(!isThinking);
+  };
+  
   const handleSendMessage = async () => {
     if (!message.trim() || isStreaming || !activeConversationId) return;
     
+    // Prepare the user message with thinking prompt if thinking mode is active
+    const userMessageContent = isThinking 
+      ? `${THINKING_PROMPT}\n\nUser: ${message}`
+      : message;
+    
     const userMessage: Omit<Message, 'id' | 'createdAt'> = {
       role: 'user',
-      content: message
+      content: userMessageContent
     };
     
     // Add user message
@@ -82,23 +116,24 @@ const FloatingInput: React.FC = () => {
       textareaRef.current.style.height = 'auto';
     }
     
-    // Show thinking state
+    // Show streaming state
     setIsStreaming(true);
-    setIsThinking(true);
     
-    // Add initial thinking message
-    const thinkingMessage: Omit<Message, 'id' | 'createdAt'> = {
+    // Add initial response message
+    const responseMessage: Omit<Message, 'id' | 'createdAt'> = {
       role: 'assistant',
-      content: 'Thinking...'
+      content: '...'
     };
-    addMessageToConversation(activeConversationId, thinkingMessage);
+    addMessageToConversation(activeConversationId, responseMessage);
     
     try {
       let aiResponse = '';
       const model = activeConversation?.model?.id || 'microsoft/mai-ds-r1:free';
+      
+      // Prepare messages array
       const messages = [
         ...activeConversation?.messages || [],
-        { role: 'user', content: message }
+        { role: 'user', content: userMessageContent }
       ].map(m => ({ role: m.role, content: m.content }));
       
       // Stream the response
@@ -106,7 +141,7 @@ const FloatingInput: React.FC = () => {
         if (chunk.choices[0]?.delta?.content) {
           aiResponse += chunk.choices[0].delta.content;
           
-          // Update the thinking message with accumulated response
+          // Update the response message with accumulated response
           updateLastMessage(activeConversationId, {
             role: 'assistant',
             content: aiResponse,
@@ -123,7 +158,10 @@ const FloatingInput: React.FC = () => {
       });
     } finally {
       setIsStreaming(false);
-      setIsThinking(false);
+      // Focus textarea after streaming is complete
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
     }
   };
   
@@ -145,6 +183,12 @@ const FloatingInput: React.FC = () => {
     e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
   };
   
+  const handlePaperclipClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowAttachOptions(prev => !prev);
+  };
+  
   return (
     <div className="fixed left-1/2 -translate-x-1/2 bottom-0 w-full max-w-3xl px-4 pb-4 md:pb-6 bg-gradient-to-t from-white via-white to-transparent dark:from-gray-900 dark:via-gray-900 pt-6">
       <div className="relative">
@@ -156,6 +200,7 @@ const FloatingInput: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               className="absolute bottom-full mb-2 left-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2 flex space-x-2"
+              onClick={(e) => e.stopPropagation()}
             >
               <button 
                 className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -180,21 +225,22 @@ const FloatingInput: React.FC = () => {
               value={message}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
-              placeholder={isThinking ? "I'm thinking about this..." : placeholder}
+              placeholder={isThinking ? "Ready to deep dive into your brain..." : placeholder}
               rows={1}
-              disabled={isStreaming || isThinking}
-              className="w-full resize-none bg-transparent border-0 focus:ring-0 focus:outline-none p-0 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:opacity-70 placeholder:truncate"
+              disabled={isStreaming}
+              className="w-full resize-none bg-transparent border-0 focus:ring-0 focus:outline-none p-0 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:opacity-70 placeholder:truncate custom-cursor"
               style={{ 
                 minHeight: '24px',
                 maxHeight: '200px',
                 overflow: 'hidden'
               }}
+              autoFocus
             />
           </div>
           
           <div className="flex items-center p-2 space-x-1">
             <button 
-              onClick={() => setShowAttachOptions(!showAttachOptions)}
+              onClick={handlePaperclipClick}
               className="p-2 rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title="Attach files"
             >

@@ -112,40 +112,40 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-4 flex items-center justify-between border-b dark:border-gray-700">
-          <div className="flex items-center space-x-2">
-            <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+      <div className="p-4 flex items-center justify-between border-b dark:border-gray-700">
+        <div className="flex items-center space-x-2">
+          <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
             <h1 className="text-lg font-bold dark:text-white">B.H.I.M.A.</h1>
-          </div>
+        </div>
           <button 
             onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
             <X className="h-5 w-5 dark:text-gray-200" />
           </button>
-        </div>
-        
-        <div className="p-4">
-          <button 
-            onClick={createNewConversation}
-            className="w-full flex items-center justify-center space-x-2 py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            <Plus className="h-5 w-5" />
-            <span>New Chat</span>
-          </button>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto scrollbar-hide px-3 py-2">
-          <div className="space-y-1">
-            {conversations.map((conversation) => (
-              <div key={conversation.id} className="group relative">
-                <button
-                  onClick={() => setActiveConversation(conversation.id)}
-                  className={`w-full text-left py-2 px-3 rounded-lg flex items-center space-x-3 group-hover:bg-gray-100 dark:group-hover:bg-gray-700 transition-colors ${
-                    activeConversationId === conversation.id ? 'bg-gray-100 dark:bg-gray-700' : ''
-                  }`}
-                >
-                  <MessageSquare className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+      </div>
+      
+      <div className="p-4">
+        <button 
+          onClick={createNewConversation}
+          className="w-full flex items-center justify-center space-x-2 py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          <Plus className="h-5 w-5" />
+          <span>New Chat</span>
+        </button>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto scrollbar-hide px-3 py-2">
+        <div className="space-y-1">
+          {conversations.map((conversation) => (
+            <div key={conversation.id} className="group relative">
+              <button
+                onClick={() => setActiveConversation(conversation.id)}
+                className={`w-full text-left py-2 px-3 rounded-lg flex items-center space-x-3 group-hover:bg-gray-100 dark:group-hover:bg-gray-700 transition-colors ${
+                  activeConversationId === conversation.id ? 'bg-gray-100 dark:bg-gray-700' : ''
+                }`}
+              >
+                <MessageSquare className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                   {editingId === conversation.id ? (
                     <input
                       ref={editInputRef}
@@ -158,12 +158,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       placeholder="Enter title..."
                     />
                   ) : (
-                    <span className="truncate flex-1 text-gray-800 dark:text-gray-200">
-                      {conversation.title}
-                    </span>
+                <span className="truncate flex-1 text-gray-800 dark:text-gray-200">
+                  {conversation.title}
+                </span>
                   )}
-                </button>
-                
+              </button>
+              
                 <div className="absolute right-2 top-1.5 flex sm:hidden group-hover:flex space-x-1">
                   {editingId === conversation.id ? (
                     <button 
@@ -174,32 +174,32 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       <Check className="h-4 w-4" />
                     </button>
                   ) : (
-                    <button 
-                      className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                      title="Edit conversation title"
+                <button 
+                  className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  title="Edit conversation title"
                       onClick={(e) => {
                         e.stopPropagation();
                         startEditing(conversation);
                       }}
-                    >
-                      <Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                    </button>
+                >
+                  <Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                </button>
                   )}
-                  <button 
-                    className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    title="Delete conversation"
+                <button 
+                  className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  title="Delete conversation"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteClick(conversation.id);
                     }}
-                  >
-                    <Trash2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  </button>
-                </div>
+                >
+                  <Trash2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+      </div>
         
         {/* Model display box above divider */}
         <div className="px-3 py-2">
@@ -209,8 +209,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </span>
           </div>
         </div>
-        
-        <div className="border-t dark:border-gray-700 p-4 space-y-2">
+      
+      <div className="border-t dark:border-gray-700 p-4 space-y-2">
           <div className="relative" ref={modelSelectorRef}>
             <AnimatePresence>
               {showModels && (
@@ -226,40 +226,40 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               )}
             </AnimatePresence>
 
-            <button 
-              onClick={() => setShowModels(!showModels)}
-              className="w-full flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <Settings className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                <span className="text-gray-800 dark:text-gray-200">Model</span>
-              </div>
-              <ChevronDown 
-                className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform ${
-                  showModels ? 'transform rotate-180' : ''
-                }`} 
-              />
-            </button>
+        <button 
+          onClick={() => setShowModels(!showModels)}
+          className="w-full flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        >
+          <div className="flex items-center space-x-3">
+            <Settings className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <span className="text-gray-800 dark:text-gray-200">Model</span>
+          </div>
+          <ChevronDown 
+            className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform ${
+              showModels ? 'transform rotate-180' : ''
+            }`} 
+          />
+        </button>
           </div>
 
           <div className="relative z-20">
-            <button className="w-full flex items-center space-x-3 py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <User2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              <span className="text-gray-800 dark:text-gray-200">Account</span>
-            </button>
-            
-            <button className="w-full flex items-center space-x-3 py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <HelpCircle className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              <span className="text-gray-800 dark:text-gray-200">Help</span>
-            </button>
-            
-            <button className="w-full flex items-center space-x-3 py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <LogOut className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              <span className="text-gray-800 dark:text-gray-200">Logout</span>
-            </button>
+        <button className="w-full flex items-center space-x-3 py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <User2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          <span className="text-gray-800 dark:text-gray-200">Account</span>
+        </button>
+        
+        <button className="w-full flex items-center space-x-3 py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <HelpCircle className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          <span className="text-gray-800 dark:text-gray-200">Help</span>
+        </button>
+        
+        <button className="w-full flex items-center space-x-3 py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <LogOut className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          <span className="text-gray-800 dark:text-gray-200">Logout</span>
+        </button>
           </div>
-        </div>
-      </aside>
+      </div>
+    </aside>
     </>
   );
 };
